@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(wxGrabber)
 
 if(MSVC)
-    add_compile_options(/std:c++17 /Zc:__cplusplus)
+    add_compile_options(/std:c++20 /Zc:__cplusplus)
 
     # Windows-specific wxWidgets paths
     set(wxWidgets_ROOT_DIR "C:/Programs/WxWidgets/wxWidgets")
@@ -40,6 +40,7 @@ file(GLOB_RECURSE project_GLOB
     #src/*.c
 )
 
+# print project_GLOB
 message(STATUS "project_GLOB: ${project_GLOB}")
 
 add_executable(wxGrabber ${project_GLOB})
@@ -78,9 +79,9 @@ if(MSVC)
         list(REMOVE_ITEM dlls_GLOB ${dllsDebug_GLOB})
     endif()
 
-    add_custom_command(TARGET wxGrabber POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${dlls_GLOB}
-            $<TARGET_FILE_DIR:wxGrabber>
+    add_custom_command(TARGET wxGrabber POST_BUILD          # Adds a post-build event to MyTest
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different           # which executes "cmake - E copy_if_different..."
+        ${dlls_GLOB}                                        # <--this is in-file
+        $<TARGET_FILE_DIR:wxGrabber>                    # <--this is out-file path            
     )
 endif()
