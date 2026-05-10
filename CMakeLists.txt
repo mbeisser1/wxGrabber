@@ -12,28 +12,12 @@ if(MSVC)
     set(wxWidgets_ROOT_DIR "C:/Programs/WxWidgets/wxWidgets")
     set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/vc_x64_dll")
 
-    find_package(wxWidgets COMPONENTS core base adv media REQUIRED)
-    include(${wxWidgets_USE_FILE})
-
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-else()
-    # Linux: bypass FindwxWidgets.cmake bugs by querying wx-config directly
-    execute_process(
-        COMMAND wx-config --cxxflags
-        OUTPUT_VARIABLE WX_CXXFLAGS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    execute_process(
-        COMMAND wx-config --libs core,base,adv,media
-        OUTPUT_VARIABLE WX_LIBS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    separate_arguments(WX_CXXFLAGS NATIVE_COMMAND "${WX_CXXFLAGS}")
-    separate_arguments(WX_LIBS NATIVE_COMMAND "${WX_LIBS}")
-
-    add_compile_options(${WX_CXXFLAGS})
 endif()
+
+# On Unix, FindwxWidgets runs wx-config; on Windows it uses wxWidgets_ROOT_DIR when set.
+find_package(wxWidgets COMPONENTS core base adv media REQUIRED)
+include(${wxWidgets_USE_FILE})
 
 file(GLOB_RECURSE project_GLOB
     src/*.cpp
@@ -47,17 +31,14 @@ add_executable(wxGrabber ${project_GLOB})
 
 if(MSVC)
     set_target_properties(wxGrabber PROPERTIES WIN32_EXECUTABLE YES)
-    target_link_libraries(wxGrabber PRIVATE ${wxWidgets_LIBRARIES})
-    target_include_directories(wxGrabber PRIVATE ${wxWidgets_INCLUDE_DIRS})
-else()
-    target_link_libraries(wxGrabber PRIVATE ${WX_LIBS})
 endif()
 
-target_include_directories(wxGrabber PRIVATE include)
+target_include_directories(wxGrabber PRIVATE include ${wxWidgets_INCLUDE_DIRS})
+target_link_libraries(wxGrabber PRIVATE ${wxWidgets_LIBRARIES})
 
 # minivorbis c implementation
 add_library(minivorbis_impl src/vorbis/minivorbis_impl.c)
-target_compile_options(minivorbis_impl PRIVATE 
+target_compile_options(minivorbis_impl PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/w>
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-w>
 )
@@ -82,6 +63,6 @@ if(MSVC)
     add_custom_command(TARGET wxGrabber POST_BUILD          # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND} -E copy_if_different           # which executes "cmake - E copy_if_different..."
         ${dlls_GLOB}                                        # <--this is in-file
-        $<TARGET_FILE_DIR:wxGrabber>                    # <--this is out-file path            
+        $<TARGET_FILE_DIR:wxGrabber>                    # <--this is out-file path
     )
 endif()
