@@ -1,6 +1,9 @@
 #include "../../include/vorbis/vorbis_wrapper.h"
 #include "../../include/vorbis/minivorbis_impl.h"
 
+#include <cstdlib>
+#include <cstring>
+
 bool VorbisWrapper::ConvertOggToWav(const std::vector<uint8_t>& oggBuffer, std::vector<uint8_t>& wavBuffer) {
     if (oggBuffer.empty()) {
         return false;

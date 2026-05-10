@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <cstring>
 #include <string>
 #include <wx/string.h>
 #include <wx/statbmp.h>

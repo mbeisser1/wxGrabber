@@ -34,11 +34,11 @@
 #include <wx/propgrid/advprops.h>
 #include <wx/textdlg.h>
 #include <wx/display.h>
-#include <wx/msw/winundef.h>
 
 #if defined(__WXMSW__)
     #include <windows.h>
     #include <mmsystem.h>
+    #include <wx/msw/winundef.h>
     #pragma comment(lib, "winmm.lib")
 #elif defined(__APPLE__)
     #include <sys/types.h>
@@ -69,11 +69,6 @@ public:
     ObjectTreeData(std::shared_ptr<DataParser::DataObject> obj) : object(obj) {}
     std::shared_ptr<DataParser::DataObject> object;
 };
-
-// Add main function for wxWidgets application
-int main(int argc, char **argv) {
-    return wxEntry(argc, argv);
-}
 
 PropertyEditDialog::PropertyEditDialog(wxWindow* parent, const wxString& title, const wxString& propId, const wxString& value)
     : wxDialog(parent, wxID_ANY, title, wxDefaultPosition, wxSize(400, -1), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
@@ -5196,8 +5191,9 @@ void MyFrame::OnHelpSystem(wxCommandEvent& event)
     long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
     wxString model;
     std::ifstream cpuinfo("/proc/cpuinfo");
-    wxString line;
-    while (std::getline(cpuinfo, line.ToStdString())) {
+    std::string lineStr;
+    while (std::getline(cpuinfo, lineStr)) {
+        wxString line(lineStr);
         if (line.StartsWith("model name")) {
             model = line.AfterFirst(':').Trim();
             break;
